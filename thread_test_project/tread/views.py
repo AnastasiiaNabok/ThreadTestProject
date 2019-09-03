@@ -2,7 +2,7 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render
-from users.models import User
+from django.contrib.auth.models import User
 
 
 from .model_serializers import ThreadModelSerializer, MessageModelSerializer
@@ -16,8 +16,8 @@ class CreateThreadView(APIView):
         serializer = self.view_request_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         request_data = serializer.data
-        member = User.objects.get(id=request_data.get('conversation_member'))
-        create_thread_data = {"participants": [self.request.user, member]}
+        create_thread_data = {"participants": [self.request.user.id,
+                                               request_data.get('conversation_member')]}
         model_serializer = ThreadModelSerializer(data=create_thread_data)
         model_serializer.is_valid(raise_exception=True)
         created_thread = model_serializer.save()

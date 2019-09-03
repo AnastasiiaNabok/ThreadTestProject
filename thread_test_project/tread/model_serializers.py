@@ -32,7 +32,7 @@ class ThreadModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        filter_set = Thread.objects.filter(participants=validated_data.get('participants'))
+        filter_set = Thread.objects.filter(participants__in=validated_data.get('participants'))
         if filter_set.exists():
             return filter_set.first()
         else:
