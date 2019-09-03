@@ -1,10 +1,10 @@
 from django.db import models
-from users.models import User
+from django.contrib.auth.models import User
 
 
 class Thread(models.Model):
 
-    participant = models.ManyToManyField(User)
+    participants = models.ManyToManyField(User)
     created = models.DateTimeField('date published', auto_now_add=True)
     updated = models.DateTimeField('date updated', auto_now=True)
 
