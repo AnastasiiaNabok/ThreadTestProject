@@ -9,22 +9,16 @@ class MessageModelSerializer(serializers.ModelSerializer):
         model = Message
         fields = '__all__'
 
+    thread_for_sender = serializers.SerializerMethodField()
 
-# class UserSerializer(serializers.ModelSerializer):
-#     treads = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = User
-#         fields = ('id', 'username', 'treads')
+    def get_thread_for_sender(self, request):
+        try:
+            participants = Thread.objects.get(id=request.thread.id).participants.all()
+            if request.sender not in participants:
+                raise Exception
+        except Exception:
+            raise ValueError('No such thread.')
 
-
-# class ThreadSerializer(serializers.ModelSerializer):
-#     messages = MessageSerializer(many=True, read_only=True, source='message_set')
-#     participants = UserSerializer(many=True, read_only=True, source='user_set')
-#
-#     class Meta:
-#         model = Thread
-#         fields = '__all__'
 
 class ThreadModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,10 +26,14 @@ class ThreadModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        filter_set = Thread.objects.filter(participants__in=validated_data.get('participants'))
-        if filter_set.exists():
-            return filter_set.first()
+        participants = validated_data.pop('participants')
+        participants_ids_list = [el.id for el in participants]
+        queryset = Thread.objects.filter(participants=participants_ids_list[0]
+                                         ).filter(participants=participants_ids_list[1])
+        if queryset.exists():
+            return queryset.first()
         else:
-            return Thread.objects.create(**validated_data)
 
-
+            thread = Thread.objects.create(**validated_data)
+            thread.participants.add(*participants)
+            return thread
