@@ -23,7 +23,4 @@ class MessageCreateViewSerializer(serializers.Serializer):
 class MessageUpdateViewSerializer(serializers.Serializer):
     """ View Serializer for Message update"""
 
-    sender = serializers.IntegerField(required=False)
-    text = serializers.CharField(required=False)
-    thread = serializers.IntegerField(required=False)
-    is_read = serializers.BooleanField(required=True)
+    message_ids = serializers.ListField(child=serializers.IntegerField())

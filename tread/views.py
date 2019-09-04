@@ -71,12 +71,15 @@ class MessageUpdateView(APIView):
         """ Message Update API with partial update"""
         view_request_serializer = MessageUpdateViewSerializer
 
-        def put(self, request, pk):
+        def put(self, request):
             serializer = self.view_request_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            message = get_object_or_404(Message.objects.all(), pk=pk)
             request_data = serializer.data
-            serializer = MessageModelSerializer(instance=message, data=request_data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            updated_message = serializer.save()
+            for message_id in request_data.get('message_ids'):
+                message = Message.objects.get(id=message_id)
+                print(message)
+                update_message_data = {"id": message_id, "is_read": not message.is_read}
+                serializer = MessageModelSerializer(instance=update_message_data, data=request_data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                updated_message = serializer.save()
             return Response(MessageModelSerializer(instance=updated_message).data)
