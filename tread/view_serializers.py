@@ -24,3 +24,9 @@ class MessageUpdateViewSerializer(serializers.Serializer):
     """ View Serializer for Message update"""
 
     message_ids = serializers.ListField(child=serializers.IntegerField())
+
+
+class UnreadMessageViewSerializer(serializers.Serializer):
+    """ View Serializer for Message update"""
+
+    count = serializers.IntegerField()

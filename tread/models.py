@@ -8,8 +8,8 @@ class Thread(models.Model):
     created = models.DateTimeField('date published', auto_now_add=True)
     updated = models.DateTimeField('date updated', auto_now=True)
 
-    # def __str__(self):
-    #     return '{}'.format(self.id)
+    def __str__(self):
+        return 'Thread {} with users {}'.format(self.id, list(self.participants.values_list('username', flat=True)))
 
 
 class Message(models.Model):
