@@ -6,7 +6,7 @@ from .models import Thread, Message
 
 
 from .model_serializers import ThreadModelSerializer, MessageModelSerializer
-from .view_serializers import ThreadCreateViewSerializer, MessageUpdateViewSerializer
+from .view_serializers import ThreadCreateViewSerializer, MessageUpdateViewSerializer, ThreadValidatorViewSerializer
 
 
 class CreateThreadView(APIView):
@@ -29,8 +29,11 @@ class DeleteThreadAPI(APIView):
     """ Thread Delete API """
     view_request_serializer = ThreadModelSerializer
 
-    def delete(self, request, pk):
-        thread = Thread.objects.get(pk=pk)
+    def delete(self, request):
+        thread_data = {"thread": request.GET.get('thread')}
+        serializer = ThreadValidatorViewSerializer(data=thread_data)
+        serializer.is_valid(raise_exception=True)
+        thread = Thread.objects.get(pk=serializer.data.get('thread'))
         print(self.request.user)
         if self.request.user not in thread.participants.all():
             raise ValueError("No permissions fot this thread")
@@ -39,7 +42,7 @@ class DeleteThreadAPI(APIView):
 
 
 class GetAllThreadsForUserApiView(generics.GenericAPIView):
-    """ Get all Threads and last message if available for User API """
+    """ Get all Threads and last message if available for authenticated User API """
 
     serializer_class = MessageModelSerializer
 
@@ -56,7 +59,7 @@ class GetAllThreadsForUserApiView(generics.GenericAPIView):
 
 
 class UnreadMessagesAPIView(generics.GenericAPIView):
-    """  This view should return count of unread messages for user """
+    """  This view return count of unread messages for authenticated user by thread """
     serializer_class = MessageModelSerializer
 
     def get(self, request):
@@ -69,6 +72,7 @@ class UnreadMessagesAPIView(generics.GenericAPIView):
 
 
 class CreateMessageView(generics.CreateAPIView):
+    """  Create Message API """
     queryset = Message.objects.all()
     serializer_class = MessageModelSerializer
 
