@@ -37,3 +37,4 @@ class ThreadModelSerializer(serializers.ModelSerializer):
             thread = Thread.objects.create(**validated_data)
             thread.participants.add(*participants)
             return thread
+

@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -6,7 +6,7 @@ from .models import Thread, Message
 
 
 from .model_serializers import ThreadModelSerializer, MessageModelSerializer
-from .view_serializers import ThreadCreateViewSerializer, MessageCreateViewSerializer, MessageUpdateViewSerializer
+from .view_serializers import ThreadCreateViewSerializer, UnreadMessageViewSerializer, MessageUpdateViewSerializer
 
 
 class CreateThreadView(APIView):
@@ -53,33 +53,38 @@ class GetAllThreadsForUserApiView(APIView):
         return user
 
 
-class CreateMessageView(APIView):
-    """ Message Create API """
-    view_serializer = MessageCreateViewSerializer
+class UnreadMessagesAPIView(generics.GenericAPIView):
+    """  This view should return count of unread messages for user """
+    serializer_class = MessageModelSerializer
 
-    def post(self, request):
-        serializer = self.view_serializer(data=request.data)
+    def get(self, request):
+        threads = Thread.objects.filter(participants=request.user)
+        count = 0
+        for thread in threads:
+            count += Message.objects.filter(thread=thread.id).filter(sender=(not request.user)).filter(is_read=False).count()
+        serializer = UnreadMessageViewSerializer(data={'count': count})
         serializer.is_valid(raise_exception=True)
-        request_data = serializer.data
-        model_serializer = MessageModelSerializer(data=request_data)
-        model_serializer.is_valid(raise_exception=True)
-        created_message = model_serializer.save()
-        return Response(MessageModelSerializer(instance=created_message).data, status=status.HTTP_201_CREATED)
+        resp_data = serializer.save()
+        return Response(UnreadMessageViewSerializer(instance=resp_data).data)
+
+
+class CreateMessageView(generics.CreateAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageModelSerializer
 
 
 class MessageUpdateView(APIView):
-        """ Message Update API with partial update"""
-        view_request_serializer = MessageUpdateViewSerializer
+    """ Message Update API with partial update"""
+    view_request_serializer = MessageUpdateViewSerializer
 
-        def put(self, request):
-            serializer = self.view_request_serializer(data=request.data)
+    def put(self, request):
+        serializer = self.view_request_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        request_data = serializer.data
+        resp_data = list()
+        for message_id in request_data.get('message_ids'):
+            message = Message.objects.get(id=message_id)
+            serializer = MessageModelSerializer(instance=message, data={'is_read': True}, partial=True)
             serializer.is_valid(raise_exception=True)
-            request_data = serializer.data
-            for message_id in request_data.get('message_ids'):
-                message = Message.objects.get(id=message_id)
-                print(message)
-                update_message_data = {"id": message_id, "is_read": not message.is_read}
-                serializer = MessageModelSerializer(instance=update_message_data, data=request_data, partial=True)
-                serializer.is_valid(raise_exception=True)
-                updated_message = serializer.save()
-            return Response(MessageModelSerializer(instance=updated_message).data)
+            resp_data.append(serializer.save())
+        return Response(MessageModelSerializer(resp_data, many=True).data)
