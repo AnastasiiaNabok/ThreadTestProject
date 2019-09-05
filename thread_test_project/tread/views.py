@@ -62,10 +62,7 @@ class UnreadMessagesAPIView(generics.GenericAPIView):
         count = 0
         for thread in threads:
             count += Message.objects.filter(thread=thread.id).filter(sender=(not request.user)).filter(is_read=False).count()
-        serializer = UnreadMessageViewSerializer(data={'count': count})
-        serializer.is_valid(raise_exception=True)
-        resp_data = serializer.save()
-        return Response(UnreadMessageViewSerializer(instance=resp_data).data)
+        return Response(data={'count': count})
 
 
 class CreateMessageView(generics.CreateAPIView):
