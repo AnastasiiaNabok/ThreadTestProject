@@ -1,12 +1,12 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from django.db.models.base import ObjectDoesNotExist
 from .models import Thread, Message
 
 
 from .model_serializers import ThreadModelSerializer, MessageModelSerializer
-from .view_serializers import ThreadCreateViewSerializer, UnreadMessageViewSerializer, MessageUpdateViewSerializer
+from .view_serializers import ThreadCreateViewSerializer, MessageUpdateViewSerializer
 
 
 class CreateThreadView(APIView):
@@ -38,19 +38,21 @@ class DeleteThreadAPI(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class GetAllThreadsForUserApiView(APIView):
-    """ Get all Threads for User API """
+class GetAllThreadsForUserApiView(generics.GenericAPIView):
+    """ Get all Threads and last message if available for User API """
 
-    queryset = Thread.objects.all()
-    serializer_class = ThreadModelSerializer
+    serializer_class = MessageModelSerializer
 
-    def get_queryset(self):
-        """
-         This view should return a list of all threads
-        for the currently authenticated user.
-        """
-        user = self.request.user.thread_set.all()
-        return user
+    def get(self, request):
+        threads = Thread.objects.filter(participants=request.user)
+        resp_data = dict()
+        for thread in threads:
+            try:
+                last_message = thread.message_set.latest('created').text
+                resp_data[thread.id] = last_message
+            except ObjectDoesNotExist:
+                resp_data[thread.id] = 'No Messages in this Thread'
+        return Response(data=resp_data)
 
 
 class UnreadMessagesAPIView(generics.GenericAPIView):
@@ -59,10 +61,11 @@ class UnreadMessagesAPIView(generics.GenericAPIView):
 
     def get(self, request):
         threads = Thread.objects.filter(participants=request.user)
-        count = 0
+        resp_data = dict()
         for thread in threads:
-            count += Message.objects.filter(thread=thread.id).filter(sender=(not request.user)).filter(is_read=False).count()
-        return Response(data={'count': count})
+            count = thread.message_set.exclude(sender=request.user, is_read=True).count()
+            resp_data[thread.id] = count
+        return Response(data=resp_data)
 
 
 class CreateMessageView(generics.CreateAPIView):
