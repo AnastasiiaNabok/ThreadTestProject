@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models.base import ObjectDoesNotExist
 from .models import Thread, Message
+from rest_framework.pagination import LimitOffsetPagination
 
 
 from .model_serializers import ThreadModelSerializer, MessageModelSerializer
@@ -30,21 +31,20 @@ class DeleteThreadAPI(APIView):
     view_request_serializer = ThreadModelSerializer
 
     def delete(self, request):
-        thread_data = {"thread": request.GET.get('thread')}
-        serializer = ThreadValidatorViewSerializer(data=thread_data)
+        serializer = ThreadValidatorViewSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
         thread = Thread.objects.get(pk=serializer.data.get('thread'))
-        print(self.request.user)
         if self.request.user not in thread.participants.all():
             raise ValueError("No permissions fot this thread")
         thread.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response()
 
 
 class GetAllThreadsForUserApiView(generics.GenericAPIView):
     """ Get all Threads and last message if available for authenticated User API """
 
     serializer_class = MessageModelSerializer
+    pagination_class = LimitOffsetPagination
 
     def get(self, request):
         threads = Thread.objects.filter(participants=request.user)
@@ -92,3 +92,43 @@ class MessageUpdateView(APIView):
             serializer.is_valid(raise_exception=True)
             resp_data.append(serializer.save())
         return Response(MessageModelSerializer(resp_data, many=True).data)
+
+
+class ThreadMessagesAPIView(APIView, LimitOffsetPagination):
+    """ Thread API"""
+    serializer_class = ThreadModelSerializer
+
+    def get(self, request):
+        """
+         This view should return a list of all messages from thread
+        """
+        serializer = ThreadValidatorViewSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
+        thread = Thread.objects.get(pk=serializer.data.get('thread'))
+
+        if self.request.user not in thread.participants.all():
+            raise ValueError("No permissions fot this thread")
+        messages = thread.message_set.all()
+        results = self.paginate_queryset(messages, request, view=self)
+        serializer = MessageModelSerializer(results, many=True)
+        return self.get_paginated_response(serializer.data)
+
+# class ThreadMessagesAPIView(generics.ListAPIView):
+#     """ Thread  API"""
+#     queryset = Thread.objects.all()
+#     serializer_class = ThreadModelSerializer
+#     pagination_class = LimitOffsetPagination
+#
+#     def get(self, request):
+#         """
+#             This view should return a list of all messages from thread
+#         """
+#         serializer = ThreadValidatorViewSerializer(data=self.request.GET)
+#         serializer.is_valid(raise_exception=True)
+#         thread = Thread.objects.get(pk=serializer.data.get('thread'))
+#
+#         if self.request.user not in thread.participants.all():
+#             raise ValueError("No permissions fot this thread")
+#         messages = thread.message_set.all()
+#         serializer = MessageModelSerializer(messages, many=True)
+#         return Response(serializer.data)

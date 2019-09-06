@@ -29,5 +29,6 @@ class MessageUpdateViewSerializer(serializers.Serializer):
 
 
 class ThreadValidatorViewSerializer(serializers.Serializer):
+    """ View Serializer for url parameter validation"""
 
     thread = serializers.IntegerField()
