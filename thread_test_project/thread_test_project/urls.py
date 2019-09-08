@@ -1,7 +1,15 @@
 from django.urls import path, include
 from django.contrib import admin
+from django.conf.urls import url
+from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_jwt.views import refresh_jwt_token
+from rest_framework_jwt.views import verify_jwt_token
+
 
 urlpatterns = [
     path(r'admin/', admin.site.urls),
-    path('api/', include('tread.urls')),
+    path('api/', include('thread.urls')),
+    url(r'^auth-jwt/', obtain_jwt_token),
+    url(r'^auth-jwt-refresh/', refresh_jwt_token),
+    url(r'^auth-jwt-verify/', verify_jwt_token),
 ]

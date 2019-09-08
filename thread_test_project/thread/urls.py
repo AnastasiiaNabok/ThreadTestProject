@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from tread import views
+from thread import views
 
 urlpatterns = [
     url(r'threads', views.GetAllThreadsForUserApiView.as_view(),),

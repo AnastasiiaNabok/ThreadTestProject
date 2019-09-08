@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True, verbose_name='date published')),
                 ('is_read', models.BooleanField(default=False)),
                 ('sender', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('thread', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tread.Thread')),
+                ('thread', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='thread.Thread')),
             ],
         ),
     ]

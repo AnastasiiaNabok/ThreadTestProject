@@ -44,7 +44,6 @@ class GetAllThreadsForUserApiView(generics.GenericAPIView):
     """ Get all Threads and last message if available for authenticated User API """
 
     serializer_class = MessageModelSerializer
-    pagination_class = LimitOffsetPagination
 
     def get(self, request):
         threads = Thread.objects.filter(participants=request.user)
@@ -112,23 +111,3 @@ class ThreadMessagesAPIView(APIView, LimitOffsetPagination):
         results = self.paginate_queryset(messages, request, view=self)
         serializer = MessageModelSerializer(results, many=True)
         return self.get_paginated_response(serializer.data)
-
-# class ThreadMessagesAPIView(generics.ListAPIView):
-#     """ Thread  API"""
-#     queryset = Thread.objects.all()
-#     serializer_class = ThreadModelSerializer
-#     pagination_class = LimitOffsetPagination
-#
-#     def get(self, request):
-#         """
-#             This view should return a list of all messages from thread
-#         """
-#         serializer = ThreadValidatorViewSerializer(data=self.request.GET)
-#         serializer.is_valid(raise_exception=True)
-#         thread = Thread.objects.get(pk=serializer.data.get('thread'))
-#
-#         if self.request.user not in thread.participants.all():
-#             raise ValueError("No permissions fot this thread")
-#         messages = thread.message_set.all()
-#         serializer = MessageModelSerializer(messages, many=True)
-#         return Response(serializer.data)
