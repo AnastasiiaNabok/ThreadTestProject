@@ -19,19 +19,7 @@
       "updated": "2019-09-06T12:59:08.085Z",
       "participants": [
         1,
-        5
-      ]
-    }
-  },
-  {
-    "model": "thread.thread",
-    "pk": 3,
-    "fields": {
-      "created": "2019-09-06T12:59:13.835Z",
-      "updated": "2019-09-06T12:59:13.835Z",
-      "participants": [
-        1,
-        3
+        4
       ]
     }
   },
@@ -43,7 +31,7 @@
       "updated": "2019-09-06T12:59:21.199Z",
       "participants": [
         2,
-        5
+        4
       ]
     }
   },
@@ -55,7 +43,7 @@
       "updated": "2019-09-06T12:59:26.568Z",
       "participants": [
         3,
-        5
+        4
       ]
     }
   }

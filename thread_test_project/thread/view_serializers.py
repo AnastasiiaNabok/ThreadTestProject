@@ -14,14 +14,6 @@ class ThreadCreateViewSerializer(serializers.Serializer):
             return conversation_member
 
 
-class MessageCreateViewSerializer(serializers.Serializer):
-    """ View Serializer for Message create"""
-    sender = serializers.IntegerField()
-    text = serializers.CharField(required=True)
-    thread = serializers.IntegerField()
-    is_read = serializers.BooleanField(default=False)
-
-
 class MessageUpdateViewSerializer(serializers.Serializer):
     """ View Serializer for Message update"""
 

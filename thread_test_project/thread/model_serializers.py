@@ -14,9 +14,8 @@ class MessageModelSerializer(serializers.ModelSerializer):
 
     def get_thread_for_sender(self, request):
         """ Method validate if sender is a part of provided Thread"""
-
+        participants = Thread.objects.get(id=request.thread.id).participants.all()
         try:
-            participants = Thread.objects.get(id=request.thread.id).participants.all()
             if request.sender not in participants:
                 raise Exception
         except Exception:

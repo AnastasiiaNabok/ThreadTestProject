@@ -3,9 +3,9 @@
     "model": "thread.message",
     "pk": 1,
     "fields": {
-      "sender": 5,
+      "sender": 2,
       "text": "blalbalbla",
-      "thread": 2,
+      "thread": 1,
       "created": "2019-09-06T12:59:57.339Z",
       "is_read": false
     }
@@ -14,9 +14,9 @@
     "model": "thread.message",
     "pk": 2,
     "fields": {
-      "sender": 5,
+      "sender": 2,
       "text": "blalbalbla2",
-      "thread": 2,
+      "thread": 1,
       "created": "2019-09-06T13:00:05.479Z",
       "is_read": false
     }
@@ -25,7 +25,7 @@
     "model": "thread.message",
     "pk": 3,
     "fields": {
-      "sender": 5,
+      "sender": 1,
       "text": "blalbalbla",
       "thread": 2,
       "created": "2019-09-06T13:00:13.778Z",
@@ -82,7 +82,7 @@
     "fields": {
       "sender": 1,
       "text": "blalbalblatest23456543",
-      "thread": 1,
+      "thread": 5,
       "created": "2019-09-06T13:00:49.063Z",
       "is_read": false
     }
