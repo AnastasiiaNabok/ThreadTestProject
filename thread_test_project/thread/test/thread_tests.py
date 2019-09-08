@@ -28,7 +28,6 @@ class ThreadTestCase(TestCase):
         self.token = response.data['token']
         self.client.credentials(
              HTTP_AUTHORIZATION='Bearer ' + self.token)
-        self.client.
 
     def test_1_post_thread(self):
         """Test Thread create with correct data"""
